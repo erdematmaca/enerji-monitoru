@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canlı Enerji Monitörü</title>
+  <style>
+    body { background-color: #121212; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin-top: 50px; }
+    .card { background: #1e1e1e; border-radius: 15px; padding: 30px; display: inline-block; margin: 15px; box-shadow: 0 4px 15px rgba(0, 255, 136, 0.2); min-width: 250px; }
+    h1 { color: #00ff88; margin-bottom: 10px; }
+    p { color: #888888; margin-bottom: 40px; }
+    h2 { color: #aaaaaa; font-weight: normal; margin-top: 0; }
+    .value { font-size: 60px; font-weight: bold; margin: 10px 0; color: #00bcd4; }
+    .unit { font-size: 24px; color: #777777; }
+    .status { color: #ff9800; font-weight: bold; margin-top: 20px; }
+    .footer { margin-top: 50px; color: #555555; font-size: 14px; }
+  </style>
+  <script>
+    // BULUT BAĞLANTISI: Firebase URL adresinizi buraya yazın (Sonunda / olmadan)
+    const firebaseDatabaseURL = "https://bitirme-86bd2-default-rtdb.europe-west1.firebasedatabase.app";
+
+    setInterval(function() {
+      fetch(firebaseDatabaseURL + '/veri.json')
+        .then(response => response.json())
+        .then(data => {
+          if(data) {
+            document.getElementById('voltaj').innerText = data.v.toFixed(2);
+            document.getElementById('akim').innerText = data.a.toFixed(2);
+            document.getElementById('durum').innerText = "● BULUT BAĞLANTISI AKTİF";
+            document.getElementById('durum').style.color = "#00ff88";
+          }
+        })
+        .catch(error => {
+          document.getElementById('durum').innerText = "○ BULUT BAĞLANTI HATASI";
+          document.getElementById('durum').style.color = "#f44336";
+          console.error("Hata:", error);
+        });
+    }, 500);
+  </script>
+</head>
+<body>
+  <h1>⚡ Küresel IoT Sistem Monitörü</h1>
+  <p>Firebase Realtime Database Bulut Altyapısı ile Dünyanın Her Yerinden Canlı Takip</p>
+  
+  <div class="card">
+    <h2>Hat Voltajı</h2>
+    <div class="value"><span id="voltaj">0.00</span><span class="unit"> V</span></div>
+  </div>
+  
+  <div class="card">
+    <h2>Çekilen Akım</h2>
+    <div class="value"><span id="akim">0.00</span><span class="unit"> mA</span></div>
+  </div>
+
+  <div id="durum" class="status">● SİSTEM BEKLENİYOR</div>
+  <div class="footer">STM32F407 & ESP32 Bulut Köprüsü | Otomatik Senkronize</div>
+</body>
+</html>
