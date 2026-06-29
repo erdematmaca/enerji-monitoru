@@ -14,24 +14,37 @@
     .status { color: #ff9800; font-weight: bold; margin-top: 30px; font-size: 14px; }
   </style>
   <script>
-    // BULUT BAĞLANTISI: Firebase URL adresinizi buraya yazın (Sonunda / olmadan)
-    const firebaseDatabaseURL = "https://bitirme-86bd2-default-rtdb.europe-west1.firebasedatabase.app/";
+// BULUT BAĞLANTISI: Firebase URL adresinizi buraya yazın (Sonunda / olmadan)
+    const firebaseDatabaseURL = "https://bitirme-86bd2-default-rtdb.europe-west1.firebasedatabase.app";
 
     setInterval(function() {
-      fetch(firebaseDatabaseURL + '/veri.json')
+      // Önbelleğe (Cache) takılmamak için URL sonuna zaman parametresi ekliyoruz
+      fetch(firebaseDatabaseURL + '/veri.json?nocache=' + new Date().getTime())
         .then(response => response.json())
         .then(data => {
-          if(data) {
-            document.getElementById('voltaj').innerText = data.v.toFixed(2);
-            document.getElementById('akim').innerText = data.a.toFixed(2);
-            document.getElementById('durum').innerText = "● BAĞLANTI AKTİF";
-            document.getElementById('durum').style.color = "#00ff88";
+          if(data && data.ts) {
+            let suAnkiZaman = new Date().getTime();
+            let fark = suAnkiZaman - data.ts;
+
+            // Eğer Firebase'deki verinin üzerinden 4 saniyeden (4000ms) fazla geçmişse
+            if (fark > 4000) {
+              document.getElementById('durum').innerText = "○ CİHAZ ÇEVRİMDIŞI (GÜÇ YOK)";
+              document.getElementById('durum').style.color = "#f44336"; // Kırmızı uyarı
+              document.getElementById('voltaj').innerText = "---";
+              document.getElementById('akim').innerText = "---";
+            } 
+            // Eğer cihaz sürekli güncel veri basıyorsa
+            else {
+              document.getElementById('voltaj').innerText = data.v.toFixed(2);
+              document.getElementById('akim').innerText = data.a.toFixed(2);
+              document.getElementById('durum').innerText = "● BAĞLANTI AKTİF";
+              document.getElementById('durum').style.color = "#00ff88"; // Yeşil
+            }
           }
         })
         .catch(error => {
-          document.getElementById('durum').innerText = "○ BAĞLANTI HATASI";
+          document.getElementById('durum').innerText = "○ BULUT BAĞLANTI HATASI";
           document.getElementById('durum').style.color = "#f44336";
-          console.error("Hata:", error);
         });
     }, 500);
   </script>
